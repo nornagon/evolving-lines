@@ -1,4 +1,4 @@
-const program = "f"
+const seed = "f"
 const d = 10
 const theta = Math.PI / 3
 
@@ -101,7 +101,7 @@ function randomRules() {
   return rules
 }
 
-while (!rules.length || !rules.some(r => r.pattern.test(program)) || !rules.some(r => r.pattern.test(steps(program, rules)))) {
+while (!rules.length || !rules.some(r => r.pattern.test(seed)) || !rules.some(r => r.pattern.test(steps(seed, rules)))) {
   rules = randomRules()
 }
 
@@ -143,7 +143,10 @@ document.body.appendChild(svg)
 document.body.appendChild(progView)
 document.body.appendChild(rulesView)
 
-rulesView.textContent = rules.map(r => `${unescapeRegExp(r.pattern.source)} → ${r.replacement}`).join('\n')
+function rulesToString(rules) {
+  return rules.map(r => `${unescapeRegExp(r.pattern.source)} → ${r.replacement}`).join('\n')
+}
+rulesView.textContent = rulesToString(rules)
 rulesView.rows = rules.length
 
 rulesView.addEventListener('input', e => {
@@ -173,7 +176,7 @@ function go() {
   ivl = setInterval(() => {
     iter += 1
     try {
-      const p = iterate(iter, program, p => steps(p, rules))
+      const p = iterate(iter, seed, p => steps(p, rules))
       const segs = run(p)
       if (segs.length > 10000) {
         console.log(segs)
@@ -187,6 +190,8 @@ function go() {
         const width = maxX - minX
         const height = maxY - minY
         svg.setAttribute('viewBox', `${minX - 10} ${minY - 10} ${width + 20} ${height + 20}`)
+        svg.setAttribute('data-rules', rulesToString(rules))
+        svg.setAttribute('data-seed', seed)
       }
       progView.textContent = p
     } catch (e) {
